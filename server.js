@@ -1,5 +1,21 @@
 const connection = require("./lib/connection");
 const inquirer = require("inquirer");
+const figlet = require("figlet");
+
+function renderFigletText() {
+  figlet("Employee Manager", (err, data) => {
+    if (err) {
+      console.log("Error rendering figlet...");
+      console.dir(err);
+    }
+    console.log(data);
+    console.log();
+    console.log();
+    promptUser();
+  });
+};
+
+renderFigletText();
 
 const promptUser = () => {
   inquirer
@@ -53,6 +69,7 @@ const viewAllDepartments = async () => {
   try {
     const sql = `SELECT department.id AS id, department.dep_name AS department FROM department`;
     const [rows, fields] = await connection.promise().query(sql);
+    console.table(rows);
     promptUser();
   } catch (err) {
     throw err;
@@ -64,6 +81,7 @@ const viewAllRoles = async () => {
     const sql = `SELECT role.id AS id, role.title AS title, role.salary AS salary, department.dep_name AS department 
               FROM role JOIN department ON role.dep_id = department.id`;
     const [rows, fields] = await connection.promise().query(sql);
+    console.table(rows);
     promptUser();
   } catch (err) {
     throw err;
@@ -73,9 +91,12 @@ const viewAllRoles = async () => {
 const viewAllEmployees = async () => {
   try {
     const sql = `SELECT employee.id, employee.first_name, employee.last_name,
-              role.title, department.dep_name AS department, role.salary 
-              FROM employee, role, department WHERE department.id = role.dep_id 
-              AND role.id = employee.role_id ORDER BY employee.id ASC`;
+              role.title, department.dep_name AS department, role.salary, 
+              CONCAT(manager.first_name, '', manager.last_name) AS manager_name
+              FROM employee JOIN role ON role.id = employee.role_id 
+              JOIN department ON department.id = role.dep_id
+              LEFT JOIN employee AS manager ON manager.id = employee.manager_id
+              ORDER BY employee.id ASC`;
     const [rows, fields] = await connection.promise().query(sql);
     console.table(rows);
     promptUser();
@@ -177,13 +198,13 @@ const updateEmployeeRole = async () => {
                     role.id AS "role_id" FROM employee, role, department WHERE
                     department.id AND role.id = employee.role_id`;
     const employees = await connection.promise().query(sql);
-    let employeeNames = employees.map(
+    let employeeNames = employees[0].map(
       (employee) => `${employee.first_name} ${employee.last_name}`
     );
 
     let roleSql = `SELECT role.id, role.title FROM role`;
     const roles = await connection.promise().query(roleSql);
-    let rolesArray = roles.map((role) => role.title);
+    let rolesArray = roles[0].map((role) => role.title);
 
     const employeeChoices = employeeNames.map((name) => ({ name}));
     const roleChoices = rolesArray.map((title) => ({ name: title }));
@@ -204,14 +225,14 @@ const updateEmployeeRole = async () => {
     ]);
 
     let newTitleId, employeeId;
-    roles.forEach((role) => {
+    roles[0].forEach((role) => {
       if (answer.chosenRole === role.title) {
         newTitleId = role.id;
       }
     });
 
-    employees.forEach((employee) => {
-      if (`${employee.first_name} ${employee.last_name}`) {
+    employees[0].forEach((employee) => {
+      if (`${employee.first_name} ${employee.last_name}` === answer.chosenEmployee) {
         employeeId = employee.id;
       }
     });
@@ -219,11 +240,11 @@ const updateEmployeeRole = async () => {
     let updateSql = `UPDATE employee SET employee.role_id = ? WHERE employee.id = ?`;
     await connection.promise().query(updateSql, [newTitleId, employeeId]);
 
-    promptUser();
+    await viewAllEmployees();
   } catch (error) {
     throw error;
   }
 };
     
-promptUser();
+
 

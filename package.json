@@ -6,8 +6,9 @@
   "scripts": {
     "test": "jest"
   },
-  "author": "Andrew Perkins",   
+  "author": "Andrew Perkins",
   "dependencies": {
+    "figlet": "^1.6.0",
     "inquirer": "^8.2.4",
     "mysql2": "^3.6.0"
   }
