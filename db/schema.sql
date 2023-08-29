@@ -1,5 +1,6 @@
 DROP DATABASE IF EXISTS employees;
 CREATE DATABASE employees;
+
 USE employees;
 
 CREATE TABLE department (
@@ -22,3 +23,13 @@ CREATE TABLE employee (
     manager_id INT
 );
 
+ALTER TABLE role 
+ADD CONSTRAINT fk_dep_id
+FOREIGN KEY (dep_id)
+REFERENCES department(id);
+
+
+ALTER TABLE employee 
+ADD CONSTRAINT fk_role_id
+FOREIGN KEY (role_id)
+REFERENCES role(id);
