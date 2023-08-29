@@ -1,4 +1,12 @@
 {
+  "name": "employee-tracker",
+  "version": "1.0.0",
+  "description": "Application for tracking employee data.",
+  "main": "server.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Andrew Perkins",   
   "dependencies": {
     "inquirer": "^8.2.4",
     "mysql2": "^3.6.0"

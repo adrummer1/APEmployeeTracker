@@ -4,7 +4,7 @@ USE employees;
 
 CREATE TABLE department (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    dep_name VARCHAR(30) NOT NULL,
+    dep_name VARCHAR(30) NOT NULL
 );
 
 CREATE TABLE role (
@@ -25,10 +25,10 @@ CREATE TABLE employee (
 ALTER TABLE role 
 ADD CONSTRAINT fk_dep_id
 FOREIGN KEY (dep_id)
-REFERENCES deparment(id);
+REFERENCES department(id);
 
 
-ALTER TABLE employee 
-ADD CONSTRAINT fk_role_id
-FOREIGN KEY (role_id)
-REFERENCES role(id);
+-- ALTER TABLE employee 
+-- ADD CONSTRAINT fk_role_id
+-- FOREIGN KEY (role_id)
+-- REFERENCES role(id);
