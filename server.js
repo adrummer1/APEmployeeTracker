@@ -18,8 +18,7 @@ function renderFigletText() {
 renderFigletText();
 
 const promptUser = () => {
-  inquirer
-    .prompt([
+  inquirer.prompt([
       {
         type: "list",
         name: "action",
@@ -28,10 +27,16 @@ const promptUser = () => {
           "View all departments",
           "View all roles",
           "View all employees",
+          "View employees by manager",
+          "View employees by department",
           "Add a department",
           "Add a role",
           "Add an employee",
           "Update an employee role",
+          "Update employee manager",
+          "Delete a department",
+          "Delete a role",
+          "Delete an employee",
         ],
       },
     ])
@@ -46,6 +51,12 @@ const promptUser = () => {
         case "View all employees":
           viewAllEmployees();
           break;
+        case "View employees by manager":
+          viewEmployeesByManager();
+          break;
+        case "View employees by department":
+          viewEmployeesByDepartment();
+          break;
         case "Add a department":
           addDepartment();
           break;
@@ -57,6 +68,18 @@ const promptUser = () => {
           break;
         case "Update an employee role":
           updateEmployeeRole();
+          break;
+        case "Update employee manager":
+          updateEmployeeManager();
+          break;
+        case "Delete a department":
+          deleteDepartment();
+          break;
+        case "Delete a role":
+          deleteRole();
+          break;
+        case "Delete an employee":
+          deleteEmployee();
           break;
         default:
           console.log("Invalid action.");
@@ -185,7 +208,9 @@ const addEmployee = () => {
         sql,
         [answer.firstName, answer.lastName, answer.role, answer.manager],
         (err, res) => {
-          if (err) throw error;
+          if (err) {
+            throw error;
+          }
           viewAllEmployees();
         }
       );
@@ -245,6 +270,165 @@ const updateEmployeeRole = async () => {
     throw error;
   }
 };
+
+const deleteDepartment = () => {
+  inquirer.prompt([
+      {
+        type: "input",
+        name: "departmentID",
+        message: "Enter the ID of the department you want to delete:",
+      }
+    ])
+    .then((answer) => {
+      let sql = `DELETE FROM department where id = ?`;
+      connection.query(sql, [answer.departmentID], (err, res) => {
+        if (err) throw err;
+        console.log("Department deleted successfully.");
+        viewAllDepartments();
+      });
+    });
+  };
+
+  const deleteRole = () => {
+    inquirer.prompt([
+        {
+          type: "input",
+          name: "roleID",
+          message: "Enter the ID of the role you want to delete:",
+        }
+      ])
+      .then((answer) => {
+        let sql = `DELETE FROM role WHERE id = ?`;
+        connection.query(sql, [answer.roleID], (err, res) => {
+          if (err) {
+            throw err;
+          }
+          console.log("Role deleted successfully.");
+          viewAllRoles();
+        });
+      });
+    };
+
+    const deleteEmployee = () => {
+      inquirer.prompt([
+          {
+            type: "input",
+            name: "employeeID",
+            message: "Enter the ID of the employee you want to delete:",
+          }
+        ])
+        .then((answer) => {
+          let sql = `DELETE FROM employee WHERE id = ?`;
+          connection.query(sql, [answer.employeeID], (err, res) => {
+            if (err) {
+              throw err;
+            };
+            console.log("Employee deleted successfully.");
+            viewAllEmployees();
+          });
+        });
+      };
+
+      const viewEmployeesByManager = async (managerName) => {
+        inquirer.prompt([
+          {
+            type: "input",
+            name: "managerId",
+            message: "Pleae provide a manager ID:",
+          }
+        ]) .then(async (answer) => {
+          try {
+            const sql = `SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id,
+                      role.title, department.dep_name AS department, role.salary, 
+                      CONCAT(manager.first_name, '', manager.last_name) AS manager_name
+                      FROM employee JOIN role ON role.id = employee.role_id 
+                      JOIN department ON department.id = role.dep_id
+                      LEFT JOIN employee AS manager ON manager.id = employee.manager_id
+                      WHERE employee.manager_id = "${answer.managerId}"
+                      ORDER BY employee.id ASC`;
+            const [rows, fields] = await connection.promise().query(sql);
+            console.table(rows);
+            promptUser();
+          } catch (err) {
+            throw err;
+          }
+        });
+      };
+
+      const viewEmployeesByDepartment = async (managerName) => {
+        inquirer.prompt([
+          {
+            type: "input",
+            name: "departmentId",
+            message: "Pleae provide a department ID:",
+          }
+        ]) .then(async (answer) => {
+          try {
+            const sql = `SELECT employee.id, employee.first_name, employee.last_name, department.id,
+                      role.title, department.dep_name AS department, role.salary, 
+                      CONCAT(manager.first_name, '', manager.last_name) AS manager_name
+                      FROM employee JOIN role ON role.id = employee.role_id 
+                      JOIN department ON department.id = role.dep_id
+                      LEFT JOIN employee AS manager ON manager.id = employee.manager_id
+                      WHERE department.id = "${answer.departmentId}"
+                      ORDER BY employee.id ASC`;
+            const [rows, fields] = await connection.promise().query(sql);
+            console.table(rows);
+            promptUser();
+          } catch (err) {
+            throw err;
+          }
+        });
+      };
+
+      const updateEmployeeManager = async () => {
+        try {
+          let sql = `SELECT employee.id, employee.first_name, employee.last_name, 
+                          role.id AS "role_id" FROM employee, role, department WHERE
+                          department.id AND role.id = employee.role_id`;
+          const employees = await connection.promise().query(sql);
+          let employeeNames = employees[0].map(
+            (employee) => `${employee.first_name} ${employee.last_name}`
+          );
+      
+          const employeeChoices = employeeNames.map((name) => ({ name}));
+      
+          const answer = await inquirer.prompt([
+            {
+              type: "list",
+              name: "chosenEmployee",
+              message: "Which employee has a new manager?",
+              choices: employeeChoices,
+            },
+            {
+              type: "list",
+              name: "chosenManager",
+              message: "Who is their new manager?",
+              choices: employeeChoices,
+            },
+          ]);
+      
+          let newManagerId, employeeId;
+          employees[0].forEach((employee) => {
+            if (`${employee.first_name} ${employee.last_name}` === answer.chosenManager) {
+              newManagerId = employee.id;
+            }
+          });
+      
+          employees[0].forEach((employee) => {
+            if (`${employee.first_name} ${employee.last_name}` === answer.chosenEmployee) {
+              employeeId = employee.id;
+            }
+          });
+      
+          let updateSql = `UPDATE employee SET employee.manager_id = ? WHERE employee.id = ?`;
+          await connection.promise().query(updateSql, [newManagerId, employeeId]);
+      
+          await viewAllEmployees();
+        } catch (error) {
+          throw error;
+        }
+      };
     
 
 

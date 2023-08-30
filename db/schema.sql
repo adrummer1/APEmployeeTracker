@@ -32,4 +32,5 @@ REFERENCES department(id);
 ALTER TABLE employee 
 ADD CONSTRAINT fk_role_id
 FOREIGN KEY (role_id)
-REFERENCES role(id);
+REFERENCES role(id)
+ON DELETE set null;
