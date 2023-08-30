@@ -1,3 +1,4 @@
+-- Database requirements for department, role, and employee
 DROP DATABASE IF EXISTS employees;
 CREATE DATABASE employees;
 
@@ -23,6 +24,7 @@ CREATE TABLE employee (
     manager_id INT
 );
 
+-- Data constraints and foreign key parameters
 ALTER TABLE role 
 ADD CONSTRAINT fk_dep_id
 FOREIGN KEY (dep_id)

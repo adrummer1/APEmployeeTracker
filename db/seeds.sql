@@ -1,3 +1,4 @@
+-- Seed data for the database
 INSERT INTO department(dep_name)
 VALUES ("Engineering"), ("Sales"), ("Accounting"), ("LEGAL"), ("Marketing");
 

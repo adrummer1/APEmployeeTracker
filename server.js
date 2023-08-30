@@ -1,7 +1,9 @@
+// Required imports
 const connection = require("./lib/connection");
 const inquirer = require("inquirer");
 const figlet = require("figlet");
 
+// Console header
 function renderFigletText() {
   figlet("Employee Manager", (err, data) => {
     if (err) {
@@ -17,6 +19,7 @@ function renderFigletText() {
 
 renderFigletText();
 
+// Application's initial user prompts
 const promptUser = () => {
   inquirer.prompt([
       {
@@ -91,7 +94,7 @@ const promptUser = () => {
     });
 };
 
-// Functions for supplying database content
+// Functions for supplying database content for viewAll
 const viewAllDepartments = async () => {
   try {
     const sql = `SELECT department.id AS id, department.dep_name AS department FROM department`;
@@ -132,6 +135,7 @@ const viewAllEmployees = async () => {
   }
 };
 
+// Functions to add data to the database 
 const addDepartment = () => {
   inquirer
     .prompt([
@@ -221,6 +225,7 @@ const addEmployee = () => {
     });
 };
 
+// Function to update the employee role
 const updateEmployeeRole = async () => {
   try {
     let sql = `SELECT employee.id, employee.first_name, employee.last_name, 
@@ -275,6 +280,7 @@ const updateEmployeeRole = async () => {
   }
 };
 
+// BONUS functions to delete data from the database
 const deleteDepartment = () => {
   inquirer.prompt([
       {
@@ -333,6 +339,7 @@ const deleteDepartment = () => {
         });
       };
 
+      // BONUS functions to view employees based on their manager or department
       const viewEmployeesByManager = async (managerName) => {
         inquirer.prompt([
           {
@@ -385,6 +392,7 @@ const deleteDepartment = () => {
         });
       };
 
+      // BONUS funcion to update an employee manager
       const updateEmployeeManager = async () => {
         try {
           let sql = `SELECT employee.id, employee.first_name, employee.last_name, 
@@ -434,6 +442,7 @@ const deleteDepartment = () => {
         }
       };
 
+      // BONUS function to view department budget
       const viewDepartmentBudget = async (departmentBudget) => {
         inquirer.prompt([
           {
