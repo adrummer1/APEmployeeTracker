@@ -34,6 +34,7 @@ const promptUser = () => {
           "Add an employee",
           "Update an employee role",
           "Update employee manager",
+          "View budget by department",
           "Delete a department",
           "Delete a role",
           "Delete an employee",
@@ -71,6 +72,9 @@ const promptUser = () => {
           break;
         case "Update employee manager":
           updateEmployeeManager();
+          break;
+        case "View budget by department":
+          viewDepartmentBudget();
           break;
         case "Delete a department":
           deleteDepartment();
@@ -334,7 +338,7 @@ const deleteDepartment = () => {
           {
             type: "input",
             name: "managerId",
-            message: "Pleae provide a manager ID:",
+            message: "Please provide a manager ID:",
           }
         ]) .then(async (answer) => {
           try {
@@ -429,6 +433,28 @@ const deleteDepartment = () => {
           throw error;
         }
       };
-    
+
+      const viewDepartmentBudget = async (departmentBudget) => {
+        inquirer.prompt([
+          {
+            type: "input",
+            name: "departmentId",
+            message: "Pleae provide a department ID:",
+          }
+        ]) .then(async (answer) => {
+        try {
+          const sql = `SELECT SUM(role.salary) AS total_budget
+          FROM employee
+          JOIN role ON role.id = employee.role_id
+          JOIN department ON department.id = role.dep_id
+          WHERE department.id = ${answer.departmentId}`;
+        const [rows, fields] = await connection.promise().query(sql);
+        console.table(rows);
+        promptUser();
+        } catch (err) {
+          throw err;
+        }
+      })
+    };
 
 
