@@ -468,7 +468,9 @@ const viewDepartmentBudget = async (departmentBudget) => {
     ])
     .then(async (answer) => {
       try {
-        const sql = `SELECT SUM(role.salary) AS total_budget
+        const sql = `SELECT 
+          dep_id AS department_id,
+          SUM(role.salary) AS total_budget
           FROM employee
           JOIN role ON role.id = employee.role_id
           JOIN department ON department.id = role.dep_id
