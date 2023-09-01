@@ -24,7 +24,10 @@ The is written in Node.js and uses the Inquirer package 8.2.4 to allow the user 
 
 ## Video Demonstration
 
+[Here is a link to a video demonstration of the application!](https://drive.google.com/file/d/1XdaQh6HY3JNJQ1betFBGQRaS68KIKFBw/view?usp=sharing)
+
 ## Credits
 
 Special thanks to my tutoring section for assisting with two of the bonus functions.
+
 
